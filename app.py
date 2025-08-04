@@ -84,7 +84,6 @@ logger = logging.getLogger(__name__)
 from py import geopip_country
 from py.currency import get_available_currencies, get_exchange_rate
 from py.db_init import init_data, init_main
-from py.finances import get_finances
 from py.g_search import get_vessel_picture
 from py.image_generator import generate_image
 from py.sql import (
@@ -101,6 +100,7 @@ from py.sql import (
     getDynamicUserTrips,
     getLeaderboardCountries,
     getManualStationsQuery,
+    getMaterialTypes,
     getNumberStations,
     getOperators,
     getTags,
@@ -172,6 +172,7 @@ from py.utils import (
 )
 from src.api.admin import admin_blueprint
 from src.api.feature_requests import feature_requests_blueprint
+from src.api.finance import finance_blueprint
 from src.consts import DbNames, TripTypes
 from src.pg import setup_db
 from src.suspicious_activity import (
@@ -209,6 +210,7 @@ from src.trips import (
 from src.paths import Path
 
 app = Flask(__name__)
+app.config['DEBUG'] = True
 Compress(app)
 app.autoversion = True
 Autoversion(app)
@@ -216,6 +218,7 @@ app.url_map.strict_slashes = False
 
 app.register_blueprint(admin_blueprint, url_prefix="/admin")
 app.register_blueprint(feature_requests_blueprint)
+app.register_blueprint(finance_blueprint)
 
 app.config["CACHE_TYPE"] = "SimpleCache"
 app.config["CACHE_DEFAULT_TIMEOUT"] = 864000
@@ -1175,10 +1178,10 @@ def before_request():
     # Check if language is set in session
     if "userinfo" in session:
         language = session["userinfo"]["lang"]
-        # Temp fix for de_CH to gsw
-        if language == "de_CH":
-            session["userinfo"]["lang"] = "gsw"
-            language = "gsw"
+        # Temp fix for pt to pt-PT
+        if language == "pt":
+            session["userinfo"]["lang"] = "pt-PT"
+            language = "pt-PT"
     else:
         # Get the list of accepted languages from the request
         accepted_languages = [lang[0] for lang in request.accept_languages]
@@ -4670,6 +4673,14 @@ def getManAndOps(username, station_type):
                 getOperators, {"username": username}
             ).fetchall()
         ]
+    with managed_cursor(mainConn) as cursor:
+        # Fetching material types for station_type from the database
+        material_types_from_db = [
+            str(material_type["material_type"]).strip()
+            for material_type in cursor.execute(
+                getMaterialTypes, {"trip_type": station_type, "username": username}
+            ).fetchall()
+        ]
 
     # Getting the list of operators from the logos function
     operators_logos = listOperatorsLogos(tripType)
@@ -4685,9 +4696,12 @@ def getManAndOps(username, station_type):
         operator: operators_logos.get(operator, None) for operator in all_operators
     }
 
+    material_types = {material_type: None for material_type in material_types_from_db if material_type}
+
     manAndOps = {
         "operators": result,
         "manualStations": manualStations,
+        "materialTypes": material_types,
         "visitedStations": visitedStations,
     }
     return jsonify(manAndOps)
@@ -7718,37 +7732,6 @@ def admin_user_growth():
         **session["userinfo"],
     )
 
-
-@app.route("/admin/finances")
-@admin_required
-def finances():
-    (
-        labels,
-        revenue_data_points,
-        hosting_spending_data_points,
-        translation_spending_data_points,
-        api_subscription_spending_data_points,
-        api_topup_spending_data_points,
-        total_spending_data_points,
-        profit_data_points,
-        totals,
-    ) = get_finances()
-    return render_template(
-        "admin/finances.html",
-        labels=labels,
-        revenue_data_points=revenue_data_points,
-        hosting_spending_data_points=hosting_spending_data_points,
-        translation_spending_data_points=translation_spending_data_points,
-        api_subscription_spending_data_points=api_subscription_spending_data_points,
-        api_topup_spending_data_points=api_topup_spending_data_points,
-        total_spending_data_points=total_spending_data_points,
-        profit_data_points=profit_data_points,
-        totals=totals,
-        username=getUser(),
-        title="Finances",
-        **lang[session["userinfo"]["lang"]],
-        **session["userinfo"],
-    )
 
 
 @app.route("/<username>/friends")

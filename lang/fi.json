@@ -87,7 +87,8 @@
     "user_settings": "Asetukset",
     "language": "Kieli",
     "en": "🇬🇧 Englanti",
-    "pt": "🇵🇹 Portugali",
+    "pt-PT": "🇵🇹 Portugali",
+    "pt-BR": "🇧🇷 Brasilianportugali",
     "ko": "🇰🇴 Korea",
     "uk": "🇺🇦 Ukraina",
     "da": "🇩🇰 Tanskan kieli",
@@ -569,6 +570,14 @@
     "feature_requests_delete_title": "Poista ominaisuuspyyntö",
     "feature_requests_delete_confirm": "Oletko varma, että haluat poistaa?",
     "feature_requests_delete_warning": "Tätä toimintoa ei voi peruuttaa. Kaikki äänet menetetään.",
+    "feature_requests_sort_by_score": "Pisteet",
+    "feature_requests_sort_by_date": "Päivämäärä",
+    "feature_requests_sort_label": "Järjestä mukaan",
+    "feature_requests_view_details": "Näytä tiedot",
+    "feature_requests_back_to_list": "Takaisin ominaisuustoiveisiin",
+    "feature_requests_upvotes": "Äänet ylös",
+    "feature_requests_downvotes_count": "Äänet alas",
+    "feature_requests_score": "Pisteet",
     "waypoint": "Reittipiste",
     "direction": "Suunta",
     "coordinates": "Koordinaatit",
@@ -578,6 +587,6 @@
     "east": "Itä",
     "west": "Länsi",
     "loading": "Ladataan...",
-    "travel_bounds_header": "Matkarajat",
-    "travel_bounds_text": "Tässä ovat matkasi pohjoisin, eteläisin, läntisin ja itäisin piste."
+    "travel_bounds_header": "Ääripisteet",
+    "travel_bounds_text": "Tässä ovat matkojesi pohjoisimmat, eteläisimmät, läntisimmät ja itäisimmät pisteet."
 }
